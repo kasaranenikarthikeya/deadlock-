@@ -32,7 +32,7 @@ const App = () => {
   const tooltipRef = useRef(null);
   const sidebarRef = useRef(null);
   const resizeRef = useRef(null);
-  const apiUrl = 'https://deadlock-backend.onrender.com';
+  const apiUrl = 'https://deadlock-backend.onrender.com/api';
 
   // Initialize snapshots from localStorage
   useEffect(() => {
@@ -247,7 +247,7 @@ const App = () => {
     }
   }, [graphState, selectedNode, selectedEdge, drawing, drawPoints]);
 
-  // Drawing overlay
+  // Drawing overlay with validation
   useEffect(() => {
     const canvas = containerRef.current.querySelector('canvas');
     const ctx = canvas.getContext('2d');
@@ -258,6 +258,10 @@ const App = () => {
       ctx.lineWidth = 3;
       ctx.setLineDash([4, 4]);
       drawPoints.forEach((point, i) => {
+        if (!point.x || !point.y || isNaN(point.x) || isNaN(point.y)) {
+          console.error('Invalid draw point:', point);
+          return;
+        }
         if (i === 0) ctx.moveTo(point.x, point.y);
         else ctx.lineTo(point.x, point.y);
       });
@@ -460,9 +464,10 @@ const App = () => {
       setGraphState(response.data.graph);
       networkRef.current.stabilize();
     } catch (error) {
+      console.error(`Action ${action} failed:`, error, error.response);
       toast.error(
         <div>
-          Error: {error.message}
+          Error: {error.message} {error.response ? `(Status: ${error.response.status})` : ''}
           <button
             onClick={() => handleAction(action, params)}
             className="ml-2 px-2 py-1 bg-teal-500 text-white rounded-md animate-pulse"
@@ -472,7 +477,6 @@ const App = () => {
         </div>,
         { duration: 5000, style: { background: '#EF4444', color: '#F1F5F9' } }
       );
-      console.error(`Action ${action} failed:`, error);
     } finally {
       setIsLoading(false);
     }
@@ -966,8 +970,8 @@ const App = () => {
                             strokeLinejoin="round"
                             strokeWidth="2"
                             d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l"
-                            />
-                            </svg>
+                          />
+                        </svg>
                       ),
                       tooltip: 'Save graph as PDF',
                     },
