@@ -32,7 +32,7 @@ const App = () => {
   const tooltipRef = useRef(null);
   const sidebarRef = useRef(null);
   const resizeRef = useRef(null);
-  const apiUrl = 'http://localhost:5000/api';
+  const apiUrl = 'https://deadlock-backend.onrender.com';
 
   // Initialize snapshots from localStorage
   useEffect(() => {
